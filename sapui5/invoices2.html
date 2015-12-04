@@ -24,8 +24,7 @@
             <mvc:View
                 controllerName="MyController"
                 xmlns="sap.m"
-                xmlns:core="sap.ui.core"
-                xmlns:app="http://schemas.sap.com/sapui5/extension/sap.ui.core.CustomData/1"
+				xmlns:core="sap.ui.core"
                 xmlns:mvc="sap.ui.core.mvc">
                 <List
                     headerText="Invoices List"
@@ -35,18 +34,25 @@
                     >
                     <items>
                         <CustomListItem>
-                            <HBox>
-                                <core:Icon size="1rem" app:pName="{invoice>ProductName}" src="{=(${invoice>favIcon})? 'sap-icon://favorite' : 'sap-icon://unfavorite'}" press="handleFavs" class="sapUiSmallMarginBegin sapUiSmallMarginTopBottom" />
-                                <VBox  class="sapUiSmallMarginBegin sapUiSmallMarginTopBottom" >
-                                    <Label text="{invoice>ProductName}"/>
-                                </VBox>
-                            </HBox>
+							<HBox>
+								<core:Icon size="2rem" src="{= (!!(${invoice>Favorite})) ? 'sap-icon://favorite' : 'sap-icon://unfavorite' }" press="handleFavs" class="sapUiSmallMarginBegin sapUiSmallMarginTopBottom" />
+								<Title level="H3" text="{invoice>ProductName}"/>
+							</HBox>
                         </CustomListItem>
                     </items>
                 </List>
             </mvc:View>
         </script>
         <script>
+            var idx, ele;
+            var applyFavorites = function(favoriteProducts, invoices){
+                favoriteProducts.forEach(function(fav){
+                    idx = invoices.findIndex(function(inv){if (inv.ProductName == fav) return inv;});
+                    ele = invoices.splice(idx, 1);
+                    invoices.unshift(ele[0]);
+                });
+                return invoices;
+            }
             var oInvoiceModel;
             var myPref = {favoriteProducts: []};
             sap.ui.getCore().attachInit(function () {
@@ -57,33 +63,19 @@
                         oInvoiceModel.loadData("./invoices.json");
                         var that = this;
                         oInvoiceModel.attachRequestCompleted(function(ev){
-                            var invoices = oInvoiceModel.getProperty('/Invoices/');
-                            oInvoiceModel.setProperty('/Invoices/', that.applyFavorites(myPref.favoriteProducts, invoices))
+                            oInvoiceModel.oData.Invoices = applyFavorites(myPref.favoriteProducts, oInvoiceModel.oData.Invoices)
                             that.getView().setModel(oInvoiceModel, "invoice");
                         });
                     },
                     handleFavs : function(oEvent) {
-                        var titleClicked = oEvent.getSource().data("pName");
-                        var idx = myPref.favoriteProducts.indexOf(titleClicked);
-                        if ( idx > -1){
-                            myPref.favoriteProducts.splice(idx, 1);
-                        } else {
-                            myPref.favoriteProducts.unshift(titleClicked);                            
-                        }
-                        var invoices = oInvoiceModel.getProperty('/Invoices/');
-                        oInvoiceModel.setProperty('/Invoices/', this.applyFavorites(myPref.favoriteProducts, invoices))
-                        oInvoiceModel.refresh();
-                    },
-                    applyFavorites : function(favoriteProducts, invoices){
-                        invoices.forEach(function(inv){inv["favIcon"] = false;});
-                        var idx, ele;
-                        favoriteProducts.forEach(function(fav){
-                            idx = invoices.findIndex(function(inv){if (inv.ProductName == fav) return inv;});
-                            ele = invoices.splice(idx, 1);
-                            ele[0]["favIcon"] = true;
-                            invoices.unshift(ele[0]);
-                        });
-                        return invoices;
+                        var titleClicked = oEvent.getSource().mProperties.title; 
+                        myPref.favoriteProducts.unshift(titleClicked);
+                        console.log(oInvoiceModel.getProperty('/Invoices/1/Favorite'));
+                        oInvoiceModel.setProperty('/Invoices/1/Favorite',true);
+                        console.log(oInvoiceModel.getProperty('/Invoices/1/Favorite'));
+                        oInvoiceModel.oData.Invoices = applyFavorites(myPref.favoriteProducts, oInvoiceModel.oData.Invoices)
+                        // this.getView().setModel(oInvoiceModel, "invoice");
+                        oInvoiceModel.refresh(true);
                     }
                 });
 

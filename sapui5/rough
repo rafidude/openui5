@@ -1,0 +1,8 @@
+                    <items>
+                        <ObjectListItem
+                            press="handleFavs"
+                            title="{invoice>ProductName}"
+                            icon= "{=(${invoice>favIcon})? 'sap-icon://favorite' : 'sap-icon://unfavorite'}"
+                            type="Active"
+                            />
+                    </items>
