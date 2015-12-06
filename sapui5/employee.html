@@ -1,0 +1,93 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta charset="UTF-8">
+
+        <title>OData Date Table Filter</title>
+
+        <script id="sap-ui-bootstrap" 
+                type="text/javascript"
+                src="https://openui5beta.hana.ondemand.com/resources/sap-ui-core.js"
+                data-sap-ui-theme="sap_goldreflection"
+                data-sap-ui-libs="sap.ui.commons,sap.ui.table,sap.ui.core"
+                data-sap-ui-xx-bindingSyntax="complex"
+        >
+        </script>
+        
+
+        <!-- XML-based view definition -->
+        <script id="view1" type="sapui5/xmlview">
+            <mvc:View
+                controllerName="local.controller"
+                xmlns:mvc="sap.ui.core.mvc"
+                xmlns:commons="sap.ui.commons"
+                xmlns="sap.ui.table">
+                <Table
+                    id="tt"
+                    rows="{
+                        path: '/Employees',
+                        parameters: {
+                            select: 'FirstName, LastName, Title'
+                        }
+                    }"
+                    title="Employees Table"
+                    visibleRowCount="7"
+                    firstVisibleRow="3"
+                    enableColumnReordering="true">
+                    <columns>
+                        <Column>
+                            <label>
+                                <commons:Label text="First Name" />
+                            </label>
+                            <template>
+                                <commons:TextField value="{FirstName}" />
+                            </template>
+                        </Column>
+                        <Column>
+                            <label>
+                                <commons:Label text="Last Name" />
+                            </label>
+                            <template>
+                                <commons:TextField value="{LastName}" />
+                            </template>
+                        </Column>
+                        <Column>
+                            <label>
+                                <commons:Label text="Title" />
+                            </label>
+                            <template>
+                                <commons:TextField value="{Title}" />
+                            </template>
+                        </Column>
+                    </columns>
+                </Table>
+            </mvc:View> 
+        </script>
+
+        <script>
+            // Controller definition
+            sap.ui.controller("local.controller", {  
+                onInit: function(oEvent) {
+                  var tab= this.getView().byId("tt");
+                  console.log(-1, tab);
+                  console.log(-2, tab["_aVisibleColumns"]);
+                }
+            });
+            
+            var oView = sap.ui.xmlview({
+                viewContent: jQuery('#view1').html()
+            });
+            
+            
+            var sURI = "https://cors-anywhere.herokuapp.com/services.odata.org/V3/Northwind/Northwind.svc/";
+            oView.setModel(new sap.ui.model.odata.ODataModel(sURI, true));
+            oView.placeAt('content');
+        </script>
+
+    </head>
+
+    <body class="sapUiBody" role="application">
+        <div id="content"></div>
+    </body>
+</html>
